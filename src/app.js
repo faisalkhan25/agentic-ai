@@ -6,13 +6,17 @@ const app = express();
 app.use(express.json());
 
 app.post("/chat", async (req, res) => {
+
     const { prompt } = req.body;
-
     const response = await askAI(prompt);
-
     res.status(200).json({
         message: response
-    })
+    });
+})
+
+app.post('/agent', (req, res) => {
+    const {input, userId, threadId} = req.body;
+
     
 })
 
