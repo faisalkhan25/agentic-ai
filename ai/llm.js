@@ -7,7 +7,7 @@ const llm = new ChatOllama({
 });
 
 export const embeddings = new OllamaEmbeddings({
-    model: "nomic-embed-text",
+    model: "nomic-embed-text:latest",
     baseUrl: "http://localhost:11434",
 });
 

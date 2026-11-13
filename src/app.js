@@ -1,5 +1,6 @@
 import express from 'express';
 import { askAI } from '../service/ai-service.js';
+import { askAgent } from '../service/agent-service.js';
 
 const app = express();
 
@@ -14,10 +15,23 @@ app.post("/chat", async (req, res) => {
     });
 })
 
-app.post('/agent', (req, res) => {
+app.post('/agent', async (req, res) => {
     const {input, userId, threadId} = req.body;
 
-    
+    if(!input || !userId || !threadId) {
+        return res.status(400).json({
+            success: false,
+            message: "Bad Request"
+        })
+    }
+
+    const response = await askAgent(input, userId, threadId);
+
+    res.status(200).json({
+        success: true,
+        message: response
+    })
+
 })
 
 export default app;

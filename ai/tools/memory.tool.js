@@ -6,7 +6,7 @@ import { embeddings } from "../llm.js";
 
 function cosineSimilarity(vecA, vecB) {
     if (!Array.isArray(vecA) || !Array.isArray(vecB) || vecA.length !== vecB.length) {
-        return -1;
+        return 0;
     }
 
     let dotProduct = 0;
@@ -25,56 +25,67 @@ function cosineSimilarity(vecA, vecB) {
 
 export const saveMemoryTool = tool(
     async ({ fact }, config) => {
-        const userId = config?.configurable?.user_id || "default-user";
-        const memoryId = `memoryId-${randomUUID()}`;
+        try {
+            const userId = config?.configurable?.user_id || "default-user";
+            const memoryId = `memoryId-${randomUUID()}`;
 
-        const embedding = await embeddings.embedQuery(fact);
+            console.log(`[saveMemoryTool] Saving for user "${userId}":`, fact);
+            const embedding = await embeddings.embedQuery(fact);
 
-        await store.put(["memories", userId], memoryId, {
-            fact,
-            embedding,
-        });
+            await store.put(["memories", userId], memoryId, {
+                fact,
+                embedding,
+            });
 
-        return `Saved to memory: "${fact}"`;
+            return `Successfully saved to memory: "${fact}"`;
+        } catch (err) {
+            console.error("[saveMemoryTool] Error:", err.message);
+            return `Failed to save memory: ${err.message}`;
+        }
     },
     {
         name: "save_user_memory",
-        description: "Save an important personal fact or preference about the user (e.g., name, role, company, location, skills) to long-term memory.",
+        description: "Save a personal fact about the user (such as name, job, company, location, skills, or preferences) to long-term memory.",
         schema: z.object({
-            fact: z.string().describe("A clear sentence describing the fact to remember about the user"),
+            fact: z.string().describe("The personal fact about the user to save, e.g. 'User name is Faisal Khan'"),
         }),
     }
 );
 
 export const recallMemoryTool = tool(
     async ({ query }, config) => {
+        try {
+            const userId = config?.configurable?.user_id || "default-user";
+            const memories = await store.search(["memories", userId]);
 
-        const userId = config?.configurable?.user_id || "default-user";
+            console.log(`[recallMemoryTool] Found ${memories.length} memories for user "${userId}" (query: "${query}")`);
 
-        const memories = await store.search(["memories", userId]);
+            if (memories.length === 0) {
+                return "No memories are stored for this user yet. Tell the user you don't know yet.";
+            }
 
-        if (memories.length === 0) {
-            return "No saved memories found for this user.";
+            const queryEmbedding = await embeddings.embedQuery(query);
+
+            const rankedMemories = memories
+                .map((item) => ({
+                    fact: item.value.fact,
+                    score: cosineSimilarity(queryEmbedding, item.value.embedding),
+                }))
+                .sort((a, b) => b.score - a.score)
+                .slice(0, 5);
+
+
+            return rankedMemories.map((item) => item.fact).join("\n");
+        } catch (err) {
+            console.error("[recallMemoryTool] Error:", err.message);
+            return `Failed to recall memories: ${err.message}`;
         }
-
-
-        const queryEmbedding = await embeddings.embedQuery(query);
-
-        const rankedMemories = memories
-            .map((item) => ({
-                fact: item.value.fact,
-                score: cosineSimilarity(queryEmbedding, item.value.embedding),
-            }))
-            .sort((a, b) => b.score - a.score)
-            .slice(0, 10);
-
-        return rankedMemories.map((item) => item.value.fact).join("\n");
     },
     {
         name: "recall_user_memories",
-        description: "Search and retrieve relevant long-term facts about the user using semantic similarity when they ask about themselves or when personal context is needed.",
+        description: "Retrieve saved personal facts about the user (such as their name, job, location, or preferences) from long-term memory.",
         schema: z.object({
-            query: z.string().describe("The topic or question to search for in the user's memories (e.g., 'user name', 'workplace and job', 'hobbies')"),
+            query: z.string().describe("What to search for in the user's memory, e.g. 'name', 'job', 'location'"),
         }),
     }
 );
