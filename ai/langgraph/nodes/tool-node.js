@@ -1,0 +1,23 @@
+import { AIMessage } from "langchain";
+import { toolsByName } from "../../llm.js";
+
+export const toolNode = async (state) => {
+
+    const lastMessage = state.messages.at(-1);
+
+    if(lastMessage == null || !AIMessage.isInstance(lastMessage)) {
+        return { messages: [] };
+    }
+
+    const result = [];
+
+
+    for(const toolCall of lastMessage.tool_calls ?? []) {
+        const tool = toolsByName[toolCall.name];
+        const observation = await tool.invoke(toolCall.args);
+        result.push(observation);
+    }
+
+    return { messages: result };
+
+}
