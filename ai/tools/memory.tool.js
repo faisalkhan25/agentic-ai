@@ -29,8 +29,8 @@ export const saveMemoryTool = tool(
             const userId = config?.configurable?.user_id || "default-user";
             const memoryId = `memoryId-${randomUUID()}`;
 
-            console.log(`[saveMemoryTool] Saving for user "${userId}":`, fact);
             const embedding = await embeddings.embedQuery(fact);
+            console.log(`[saveMemoryTool] Saving for user "${userId}":`, fact);
 
             await store.put(["memories", userId], memoryId, {
                 fact,

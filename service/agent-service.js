@@ -15,6 +15,8 @@ export async function askAgent(input, userId = "default-user", threadId = "defau
         }
     );
 
+    console.log(response.messages);
+
     const finalAnswer = response.messages.at(-1).content;
     return finalAnswer;
 }
