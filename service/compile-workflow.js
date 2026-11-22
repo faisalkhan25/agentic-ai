@@ -1,10 +1,10 @@
 import { END, START, StateGraph } from "@langchain/langgraph";
-import { agentState } from "../ai/langgraph/state";
-import { modelNode } from "../ai/langgraph/nodes/model-node";
-import { toolNode } from "../ai/langgraph/nodes/tool-node";
-import { shouldContinue } from "../ai/langgraph/agent-workflow";
+import { agentState } from "../ai/langgraph/state.js";
+import { modelNode } from "../ai/langgraph/nodes/model-node.js";
+import { toolNode } from "../ai/langgraph/nodes/tool-node.js";
+import { shouldContinue } from "../ai/langgraph/agent-workflow.js";
 
-export const agent = new StateGraph(agentState)
+export const agentLang = new StateGraph(agentState)
     .addNode("agentCall", modelNode)
     .addNode("toolNode", toolNode)
     .addEdge(START, "agentCall")

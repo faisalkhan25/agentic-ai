@@ -1,9 +1,9 @@
 import { HumanMessage } from "langchain";
-import { agent } from "./compile-workflow.js";
+import {agentLang } from "./compile-workflow.js";
 
 
-export const askAgent = async (input) => {
-    const response = await agent.invoke({
+export const askAgentLang = async (input) => {
+    const response = await agentLang.invoke({
         messages: [new HumanMessage(input)]
     });
 

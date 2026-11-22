@@ -14,7 +14,7 @@ export const toolNode = async (state) => {
 
     for(const toolCall of lastMessage.tool_calls ?? []) {
         const tool = toolsByName[toolCall.name];
-        const observation = await tool.invoke(toolCall.args);
+        const observation = await tool.invoke(toolCall);
         result.push(observation);
     }
 
