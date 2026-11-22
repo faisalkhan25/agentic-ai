@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { tool } from "langchain";
+import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 import { store } from "../../config/db.js";
 import { embeddings } from "../llm.js";
