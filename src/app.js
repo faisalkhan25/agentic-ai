@@ -37,9 +37,11 @@ app.post('/agent', async (req, res) => {
 
 app.post('/workflow/agent', async (req, res) => {
 
-    const {input} = req.body;
+    const {input, threadId, userId} = req.body;
+    
 
-    const response = await askAgentLang(input);
+
+    const response = await askAgentLang(input, threadId, userId);
 
     return res.status(200).json({
         message: response

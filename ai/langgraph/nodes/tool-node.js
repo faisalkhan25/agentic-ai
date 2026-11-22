@@ -1,7 +1,7 @@
 import { AIMessage } from "langchain";
 import { toolsByName } from "../../llm.js";
 
-export const toolNode = async (state) => {
+export const toolNode = async (state, config) => {
 
     const lastMessage = state.messages.at(-1);
 
@@ -14,7 +14,7 @@ export const toolNode = async (state) => {
 
     for(const toolCall of lastMessage.tool_calls ?? []) {
         const tool = toolsByName[toolCall.name];
-        const observation = await tool.invoke(toolCall);
+        const observation = await tool.invoke(toolCall, config);
         result.push(observation);
     }
 

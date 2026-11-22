@@ -3,6 +3,7 @@ import { agentState } from "../ai/langgraph/state.js";
 import { modelNode } from "../ai/langgraph/nodes/model-node.js";
 import { toolNode } from "../ai/langgraph/nodes/tool-node.js";
 import { shouldContinue } from "../ai/langgraph/agent-workflow.js";
+import { checkpointer } from "../config/db.js"
 
 export const agentLang = new StateGraph(agentState)
     .addNode("agentCall", modelNode)
@@ -10,4 +11,4 @@ export const agentLang = new StateGraph(agentState)
     .addEdge(START, "agentCall")
     .addConditionalEdges("agentCall", shouldContinue, ["toolNode", END])
     .addEdge("toolNode", "agentCall")
-    .compile();
+    .compile({ checkpointer });
