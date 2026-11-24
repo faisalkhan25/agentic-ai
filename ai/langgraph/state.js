@@ -11,3 +11,12 @@ export const agentState = new StateSchema({
         { reducer: (oldValue, newValue) => oldValue + newValue }
     ),
 })
+
+export const stateHITL = new StateSchema({
+    messages: MessagesValue,
+    approved: z.boolean().default(false),
+    llmCalls: new ReducedValue(
+        z.number().default(() => 0),
+        { reducer: (oldValue, newValue) => oldValue + newValue }
+    ),
+});
